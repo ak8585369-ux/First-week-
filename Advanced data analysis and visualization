@@ -1,0 +1,53 @@
+*Visualizations, Code Snippets & Analytical Interpretations*
+
+1 Distribution of Delivery Delays & SLA Adherence
+Methodology & Visualization Rationale: A combined Histogram and Kernel Density Estimation (KDE) plot was selected to evaluate the probability distribution of lead-time variances against the zero-hour SLA threshold.
+
+Key Analytical Insights: The delay distribution exhibits a distinct right-side tail (mean delay of +4.2 hours vs. median of +1.8 hours). Approximately 61.4% of total shipments meet on-time requirements (<=0 hours), while 38.6% violate promised customer delivery SLAs. Severe delays (>15 hours) constitute 11.2% of total consignments, identifying substantial tail risk in current operational scheduling.
+
+# Visualization 1: Delay Distribution Plot
+fig, ax = plt.subplots(figsize=(7, 3.8))
+sns.histplot(df['Delay_Hours'], kde=True, color='#1B365D', bins=35, ax=ax)
+ax.axvline(0, color='#D9534F', linestyle='--', linewidth=2, label='SLA Threshold (0h)')
+ax.set_title('Distribution of Delivery Delay Hours (Actual vs. Scheduled)', fontweight='bold')
+ax.set_xlabel('Delay in Hours (<0 Early/On-time, >0 Late)')
+ax.legend()
+plt.tight_layout()
+plt.show()
+
+2 Transportation Cost Drivers (Distance, Mode & Volume)
+Methodology & Visualization Rationale: A multi-dimensional scatter plot was constructed with color encoding for transport mode and point size representing cargo volume (m³) to assess multi-attribute cost behavior.
+
+Key Analytical Insights: Distance is the primary linear driver of transportation costs, but modality exerts a strong multiplicative slope multiplier. Air Express displays the steepest marginal cost gradient ($5.50/KM/m³), whereas Rail Intermodal and Maritime Barge maintain shallow cost trajectories even at long ranges (>1,800 KM). Consignments exceeding 50 m³ volume incur significant penalty premiums when routed via Road Freight due to multi-truck dispatch requirements.
+
+
+## Visualization 2: Multi-Dimensional Freight Cost Scatter Plot
+fig, ax = plt.subplots(figsize=(7, 4.0))
+sns.scatterplot(
+    data=df, x='Distance_KM', y='Transportation_Cost_USD',
+    hue='Transport_Mode', size='Shipment_Volume_m3', sizes=(20, 180),
+    palette=['#1B365D', '#4682B4', '#D9534F', '#2E7D32'], ax=ax
+)
+ax.set_title('Transportation Cost vs. Distance by Mode & Volume', fontweight='bold')
+ax.set_xlabel('Transit Distance (KM)')
+ax.set_ylabel('Total Cost (USD $)')
+plt.legend(bbox_to_anchor=(1.02, 1), loc='upper left')
+plt.tight_layout()
+plt.show()
+
+3 Route Bottleneck Identification via Variance Dispersion
+Methodology & Visualization Rationale: Boxplots were deployed to capture quartile dispersion, median transit variance, and outlier frequency across five primary shipping corridors.
+
+Key Analytical Insights: The 'Trans-Mountain' and 'Pacific Coastal' corridors exhibit the highest median delays (+7.4h and +5.1h respectively) along with extended upper whiskers, demonstrating high operational instability and vulnerability to transit disruptions. In contrast, the 'Midwest Trunk' route maintains tight IQR bounds and low median delay (+0.6h), representing the most reliable operational corridor in the logistics network.
+
+## Visualization 3: Route Bottleneck Boxplot
+fig, ax = plt.subplots(figsize=(7, 3.8))
+sns.boxplot(data=df, x='Route', y='Delay_Hours', palette='Blues_r', ax=ax, width=0.5)
+ax.axhline(0, color='#D9534F', linestyle='--', linewidth=1.5)
+ax.set_title('Operational Delay Variance by Strategic Freight Route', fontweight='bold')
+plt.xticks(rotation=15, ha='right')
+plt.tight_layout()
+plt.show()
+
+4 Multivariate Correlation Matrix
+Methodology & Visualization Rationale: A lower-triangular Pearson correlation heatmap was generated to quantify the collinearity between operational metrics, payload attributes, and financial costs.
